@@ -7,8 +7,6 @@ Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
 *Note the original Top/Bottom buttons now have an additional arrow/echelon to indicate that they scroll the farthest
 
 ## Setup
-!After an update you might have to either grab the newest release of SRFastScrollButtons or reinstall MelonLoader completely!
-
 1. Install MelonLoader if you don't already have it:  https://wiki.synthriderz.com/en/guides/installing-mods
 2. Grab the newest version of SRFastScrollButtons from releases and extract it to your game directory under .../SynthRiders/Mods (create Mods directory if necessary)
 3. [Jam out with Strong Bad!](https://homestarrunner.com/assets/sbemails/sounds/scrollsong3_10.mp3)
