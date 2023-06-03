@@ -12,7 +12,7 @@ Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
 3. [Jam out with Strong Bad!](https://homestarrunner.com/assets/sbemails/sounds/scrollsong3_10.mp3)
 
 ## Known Issues
-* Cosmetic: Highlighting either of the new buttons will highlight the buttons I copied them from.
+* Cosmetic: Hovering over either of the new buttons will highlight the buttons I copied them from.
 * Cosmetic: When at the very top or bottom of the song list, the 3rd arrow/echelon in the Top/Bottom buttons will not dim like the others, nor will the new buttons.
 
 ## Disclaimer
