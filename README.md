@@ -16,7 +16,7 @@ Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
 
 ## Known Issues
 * Cosmetic: Highlighting either of the new buttons will highlight the buttons I copied them from.
-* Cosmetic: When at the very top or bottom of the song list, the 3rd arrow/echelon in the Top/Bottom buttons will not dim like the others.
+* Cosmetic: When at the very top or bottom of the song list, the 3rd arrow/echelon in the Top/Bottom buttons will not dim like the others, nor will the new buttons.
 
 ## Disclaimer
 This mod is not related to Synth Riders Devs or Kluge Interactive or The Brothers Chaps.
