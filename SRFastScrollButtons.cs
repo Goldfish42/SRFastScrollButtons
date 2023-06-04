@@ -6,11 +6,12 @@ using System.IO;
 using VRTK.UnityEventHelper;
 using Synth.Utils;
 using System.Collections.Generic;
-using SRModCore;
+//using SRModCore;
 using UnityEngine.Events;
 using Util.Navigation;
 using UnityEngine.UI;
 using System.Runtime.InteropServices;
+using SRFastScrollButtons.Wrappers;
 
 namespace SRFastScrollButtons
 {
@@ -18,8 +19,11 @@ namespace SRFastScrollButtons
     {
         public static SRFastScrollButtons Instance; // { get; private set; }
 
+        private LSACWrapper loopScrollArrowControllerW;
+
         LoopScrollArrowController controllerLSAC;
         LoopScrollRect loopScrollLSR;
+        Animator btnAnimator;
 
         // Reflection vars
         static Type typeLSAC = typeof(LoopScrollArrowController);
@@ -39,16 +43,17 @@ namespace SRFastScrollButtons
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
+            var mainMenuScenes = new List<string>()
+            {
+                "01.The Room",
+                "02.The Void",
+                "03.Roof Top",
+                "04.The Planet",
+                "SongSelection"
+            };
             base.OnSceneWasInitialized(buildIndex, sceneName);
 
-            SRScene scene = new SRScene(sceneName);
-            MelonLogger.Msg("SRFS: Scene initialized: " + sceneName + ". Type: " + scene.SceneType);
-
-            if (scene.SceneType == SRScene.SRSceneType.MAIN_MENU)
-            {
-                MelonLogger.Msg("SRFS: MainMenu loaded");
-                ButtonInit();
-            }
+            if (mainMenuScenes.Contains(sceneName)) ButtonInit();
         }
 
         private void ButtonInit()
@@ -63,21 +68,38 @@ namespace SRFastScrollButtons
                 Transform bottomButtonT = scrollArrowsT.Find("Bottom");
                 Transform topButtonT = scrollArrowsT.Find("Top");
 
-                // vars for repositioning the buttons
+                // vars for repositioning the buttons and their colliders
                 float lateralOffset = 0.7f;
                 Vector3 newPosition;
-                Vector3 originalScale;
+                Vector3 origScale;
+                BoxCollider newCollider;
+                BoxCollider origCollider;
+
+
+                // Add the new LSACWrapper which will eventually replace the LoopScrollArrowController
+                GameObject scrollArrowsGO = scrollArrowsT.gameObject;
+                scrollArrowsGO.AddComponent<LSACWrapper>();// Delete the original LoopScrollArrowController component and replace with the LSACWrapper instance
+
+                // Delete the original LoopScrollArrowController component
+                //controllerLSAC = scrollArrowsT.GetComponent<LoopScrollArrowController>();
+                //Component.Destroy(controllerLSAC); // doing this deletes the LoopScrollArrowController inside the LSACWrapper as well!
+
+                // get a reference to the new LSACWrapper
+                //loopScrollArrowControllerW = new LSACWrapper(controllerLSAC); // save native LSAC in wrapper
+                loopScrollArrowControllerW = scrollArrowsGO.GetComponent<LSACWrapper>();
 
                 // Keep the ScrollArrowController and LoopScrollRect for later
-                controllerLSAC = scrollArrowsT.GetComponent<LoopScrollArrowController>();
-                loopScrollLSR = (LoopScrollRect)loopScrollFI.GetValue(controllerLSAC);
-                if (loopScrollLSR.name != "Songs Scroll") {
-                    loopScrollLSR = null;
-                    throw new Exception("Wrong LoopScrollRect found!");
-                }
+                //controllerLSAC = scrollArrowsT.GetComponent<LoopScrollArrowController>();
+
+
+                //loopScrollLSR = (LoopScrollRect)loopScrollFI.GetValue(controllerLSAC);
+                //if (loopScrollLSR.name != "Songs Scroll") {
+                //    loopScrollLSR = null;
+                //    throw new Exception("Wrong LoopScrollRect found!");
+                //}
 
                 // define the number of songs that each button press will skip
-                fastStepCount = controllerLSAC.StepCount * fastStepFactor;
+                //fastStepCount = controllerLSAC.StepCount * fastStepFactor;
 
                 // vars to manipulate button events
                 VRTK_InteractableObject_UnityEvents eventsVIOUE;
@@ -105,7 +127,17 @@ namespace SRFastScrollButtons
 
                 // activate fastDownButton and add listener
                 fastDownButtonGO.SetActive(true);  // is this necessary?
-                persistentEvents.OnUse.AddListener(ScrollDownFast);
+                persistentEvents.OnUse.AddListener(loopScrollArrowControllerW.ScrollDownFast);
+
+                // Rework the button animator
+                //btnAnimator = fastDownButtonGO.GetComponent<Animator>();
+
+                // Reposition BoxCollider
+                origCollider = bottomButtonT.GetComponent<BoxCollider>();
+                newCollider = fastDownButtonGO.GetComponent<BoxCollider>();
+                newCollider.center = origCollider.center + (fastDownButtonGO.transform.position - bottomButtonT.position);
+                newCollider.size = origCollider.size * fastDownButtonGO.transform.localScale.x / bottomButtonT.localScale.x;                
+
                 //===============================================================================================
 
                 //===============================================================================================
@@ -130,7 +162,7 @@ namespace SRFastScrollButtons
 
                 // activate fastDownButton and add listener
                 fastUpButtonGO.SetActive(true);  // is this necessary?
-                persistentEvents.OnUse.AddListener(ScrollUpFast);
+                persistentEvents.OnUse.AddListener(loopScrollArrowControllerW.ScrollUpFast);
                 //===============================================================================================
 
                 //===============================================================================================
@@ -143,16 +175,16 @@ namespace SRFastScrollButtons
                 float downIconVertOffset = downIconVertDiff / 2.0f;
 
                 // shift the icons to keep them more centered when the third one is added
-                originalScale = downIcon0GO.transform.localScale;
+                origScale = downIcon0GO.transform.localScale;
                 newPosition = downIcon0GO.transform.position;
                 newPosition.y -= downIconVertOffset;
                 downIcon0GO.transform.position = newPosition;
-                downIcon0GO.transform.localScale = originalScale;
-                originalScale = downIcon1GO.transform.localScale;
+                downIcon0GO.transform.localScale = origScale;
+                origScale = downIcon1GO.transform.localScale;
                 newPosition = downIcon1GO.transform.position;
                 newPosition.y -= downIconVertOffset;
                 downIcon1GO.transform.position = newPosition;
-                downIcon1GO.transform.localScale = originalScale;
+                downIcon1GO.transform.localScale = origScale;
 
                 // Clone the outermost icon
                 GameObject downIcon2GO = GameObject.Instantiate(downIcon1GO);
@@ -176,16 +208,16 @@ namespace SRFastScrollButtons
                 float upIconVertOffset = upIconVertDiff / 2.0f;
 
                 // shift the icons to keep them more centered when the third one is added
-                originalScale = upIcon0GO.transform.localScale;
+                origScale = upIcon0GO.transform.localScale;
                 newPosition = upIcon0GO.transform.position;
                 newPosition.y += upIconVertOffset;
                 upIcon0GO.transform.position = newPosition;
-                upIcon0GO.transform.localScale = originalScale;
-                originalScale = upIcon1GO.transform.localScale;
+                upIcon0GO.transform.localScale = origScale;
+                origScale = upIcon1GO.transform.localScale;
                 newPosition = upIcon1GO.transform.position;
                 newPosition.y += upIconVertOffset;
                 upIcon1GO.transform.position = newPosition;
-                upIcon1GO.transform.localScale = originalScale;
+                upIcon1GO.transform.localScale = origScale;
 
                 // Clone the outermost icon
                 GameObject upIcon2GO = GameObject.Instantiate(upIcon0GO);
@@ -198,55 +230,61 @@ namespace SRFastScrollButtons
                 upIcon2GO.transform.position = newPosition;
                 upIcon2GO.transform.localScale = upIcon0GO.transform.localScale;
                 //===============================================================================================
+
+                //===============================================================================================
+                // Delete the original LoopScrollArrowController component and replace with the LSACWrapper instance
+                //Component.Destroy(controllerLSAC);
+                //===============================================================================================
             }
             catch (NullReferenceException ex)
             {
-                string stackTrace = ex.StackTrace;
                 MelonLogger.Msg("Null reference exception: " + ex.Message);
                 MelonLogger.Msg("Stack Trace: " + ex.StackTrace);
             }
 
         }
 
-        public void ScrollUpFast(object sender, VRTK.InteractableObjectEventArgs e)
-        {
-            try
-            {
-                if (controllerLSAC.CurrentIndex - fastStepCount > 0)
-                {
-                    controllerLSAC.CurrentIndex -= fastStepCount;
-                }
-                else
-                {
-                    controllerLSAC.CurrentIndex = 0;
-                }
-                DoScrollMI.Invoke(controllerLSAC, args);
-            }
-            catch (NullReferenceException ex)
-            {
-                MelonLogger.Msg("Null reference exception: " + ex.Message);
-            }
-        }
+        //public void ScrollUpFast(object sender, VRTK.InteractableObjectEventArgs e)
+        //{
+        //    try
+        //    {
+        //        if (controllerLSAC.CurrentIndex - fastStepCount > 0)
+        //        {
+        //            controllerLSAC.CurrentIndex -= fastStepCount;
+        //        }
+        //        else
+        //        {
+        //            controllerLSAC.CurrentIndex = 0;
+        //        }
+        //        DoScrollMI.Invoke(controllerLSAC, args);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        MelonLogger.Msg("Null reference exception: " + ex.Message);
+        //        MelonLogger.Msg("Stack Trace: " + ex.StackTrace);
+        //    }
+        //}
 
-        public void ScrollDownFast(object sender, VRTK.InteractableObjectEventArgs e)
-        {
-            try
-            {
-                if (controllerLSAC.CurrentIndex + fastStepCount < loopScrollLSR.totalCount)
-                {
-                    controllerLSAC.CurrentIndex += fastStepCount;
-                } 
-                else
-                {
-                    controllerLSAC.CurrentIndex = loopScrollLSR.totalCount - 1;
-                }
-                DoScrollMI.Invoke(controllerLSAC, args);
-            }
-            catch (NullReferenceException ex)
-            {
-                MelonLogger.Msg("Null reference exception: " + ex.Message);
-            }
-        }   
+        //public void ScrollDownFast(object sender, VRTK.InteractableObjectEventArgs e)
+        //{
+        //    try
+        //    {
+        //        if (controllerLSAC.CurrentIndex + fastStepCount < loopScrollLSR.totalCount)
+        //        {
+        //            controllerLSAC.CurrentIndex += fastStepCount;
+        //        } 
+        //        else
+        //        {
+        //            controllerLSAC.CurrentIndex = loopScrollLSR.totalCount - 1;
+        //        }
+        //        DoScrollMI.Invoke(controllerLSAC, args);
+        //    }
+        //    catch (NullReferenceException ex)
+        //    {
+        //        MelonLogger.Msg("Null reference exception: " + ex.Message);
+        //        MelonLogger.Msg("Stack Trace: " + ex.StackTrace);
+        //    }
+        //}   
         
     }
 }
