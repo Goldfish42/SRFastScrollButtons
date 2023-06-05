@@ -2,6 +2,8 @@
 
 Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
 
+The standard arrow buttons also scroll instantly one page at a time, so the scroll animation no longer glitches out if you spam those buttons.
+
 ![preview](preview.png)
 
 *Note the original Top/Bottom buttons now have an additional arrow/echelon to indicate that they scroll the farthest
@@ -12,8 +14,8 @@ Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
 3. [Jam out with Strong Bad!](https://homestarrunner.com/assets/sbemails/sounds/scrollsong3_10.mp3)
 
 ## Known Issues
-* Cosmetic: Hovering over either of the new buttons will highlight the buttons I copied them from.
-* Cosmetic: When at the very top or bottom of the song list, the 3rd arrow/echelon in the Top/Bottom buttons will not dim like the others, nor will the new buttons.
+* Cosmetic: Scrolling with the controller thumbstick always gives animation appearance that the list is scrolling down, even if it's actually scrolling up.
+* Cosmetic: At the very top or bottom of the song list, the appropriate buttons do not become disabled.
 
 ## Disclaimer
 This mod is not related to Synth Riders Devs or Kluge Interactive or The Brothers Chaps.
