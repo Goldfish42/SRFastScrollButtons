@@ -82,15 +82,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MonoBehaviors\FastScrollArrowController.cs" />
     <Compile Include="SRFastScrollButtons.cs" />
-    <Compile Include="MonoBehaviors\ScrollingMonoBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Wrappers\LSACWrapper.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="libs\SRModCore.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

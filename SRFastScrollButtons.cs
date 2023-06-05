@@ -11,7 +11,7 @@ using UnityEngine.Events;
 using Util.Navigation;
 using UnityEngine.UI;
 using System.Runtime.InteropServices;
-using SRFastScrollButtons.Wrappers;
+using SRFastScrollButtons.MonoBehaviors;
 
 namespace SRFastScrollButtons
 {
@@ -19,27 +19,17 @@ namespace SRFastScrollButtons
     {
         public static SRFastScrollButtons Instance; // { get; private set; }
 
-        private LSACWrapper loopScrollArrowControllerW;
-
         LoopScrollArrowController controllerLSAC;
         LoopScrollRect loopScrollLSR;
-        Animator btnAnimator;
+        FastScrollArrowController controllerFSAC;
+        //int prevIndex = 0;
 
         // Reflection vars
         static Type typeLSAC = typeof(LoopScrollArrowController);
-        static MethodInfo DoScrollMI = typeLSAC.GetMethod("DoScroll", BindingFlags.NonPublic | BindingFlags.Instance);
-        static object[] args = { true };
         static FieldInfo loopScrollFI = typeLSAC.GetField("loopScroll", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private int fastStepFactor = 10;
-        private int fastStepCount = 0;
 
         private GameObject fastDownButtonGO;
         private GameObject fastUpButtonGO;
-
-        //private SRLogger logger;
-        private UnityAction<object, VRTK.InteractableObjectEventArgs> onScrollDownFastUse;
-        private UnityAction<object, VRTK.InteractableObjectEventArgs> onScrollUpFastUse;
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
@@ -62,47 +52,25 @@ namespace SRFastScrollButtons
 
             try
             {
-                // Locate the pre-existing buttons to clone
+                // Locate the pre-existing buttons
                 GameObject songSelectionGO = GameObject.Find("SongSelection");
                 Transform scrollArrowsT = songSelectionGO.transform.Find("SelectionSongPanel/CentralPanel/Song Selection/VisibleWrap/Songs/Scroll Arrows");
                 Transform bottomButtonT = scrollArrowsT.Find("Bottom");
                 Transform topButtonT = scrollArrowsT.Find("Top");
+                Transform upButtonT = scrollArrowsT.Find("Up");
+                Transform downButtonT = scrollArrowsT.Find("Down");
 
-                // vars for repositioning the buttons and their colliders
+                // vars for repositioning the buttons
                 float lateralOffset = 0.7f;
                 Vector3 newPosition;
-                Vector3 origScale;
-                BoxCollider newCollider;
-                BoxCollider origCollider;
-
-
-                // Add the new LSACWrapper which will eventually replace the LoopScrollArrowController
-                GameObject scrollArrowsGO = scrollArrowsT.gameObject;
-                scrollArrowsGO.AddComponent<LSACWrapper>();// Delete the original LoopScrollArrowController component and replace with the LSACWrapper instance
-
-                // Delete the original LoopScrollArrowController component
-                //controllerLSAC = scrollArrowsT.GetComponent<LoopScrollArrowController>();
-                //Component.Destroy(controllerLSAC); // doing this deletes the LoopScrollArrowController inside the LSACWrapper as well!
-
-                // get a reference to the new LSACWrapper
-                //loopScrollArrowControllerW = new LSACWrapper(controllerLSAC); // save native LSAC in wrapper
-                loopScrollArrowControllerW = scrollArrowsGO.GetComponent<LSACWrapper>();
+                Vector3 originalScale;
 
                 // Keep the ScrollArrowController and LoopScrollRect for later
-                //controllerLSAC = scrollArrowsT.GetComponent<LoopScrollArrowController>();
-
-
-                //loopScrollLSR = (LoopScrollRect)loopScrollFI.GetValue(controllerLSAC);
-                //if (loopScrollLSR.name != "Songs Scroll") {
-                //    loopScrollLSR = null;
-                //    throw new Exception("Wrong LoopScrollRect found!");
-                //}
-
-                // define the number of songs that each button press will skip
-                //fastStepCount = controllerLSAC.StepCount * fastStepFactor;
+                controllerLSAC = scrollArrowsT.GetComponent<LoopScrollArrowController>();
+                controllerFSAC = scrollArrowsT.gameObject.AddComponent<FastScrollArrowController>();
 
                 // vars to manipulate button events
-                VRTK_InteractableObject_UnityEvents eventsVIOUE;
+                VRTK_InteractableObject_UnityEvents events;
                 VRTK_InteractableObject_UnityEvents persistentEvents;
 
                 //===============================================================================================
@@ -116,27 +84,33 @@ namespace SRFastScrollButtons
                 fastDownButtonGO.transform.position = newPosition;
                 fastDownButtonGO.transform.localScale = bottomButtonT.localScale;
 
-                // remove pre-existing listeners from fastDownButton
-                eventsVIOUE = fastDownButtonGO.GetComponent<VRTK_InteractableObject_UnityEvents>();
-                eventsVIOUE.OnUse.RemoveAllListeners(); // no non-persistent listeners to remove as of 20230602
+                // get all event listeners
+                events = fastDownButtonGO.GetComponent<VRTK_InteractableObject_UnityEvents>();
                 persistentEvents = fastDownButtonGO.GetComponentInChildren<VRTK_InteractableObject_UnityEvents>();
+
+                // remove pre-existing listeners
+                events.OnTouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUntouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUse.RemoveAllListeners(); // no (non-persistent) listeners to remove as of 20230602
+
+                // disable pre-existing persistent listeners
+                for (int i = persistentEvents.OnTouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnTouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUntouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUntouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
                 for (int i = persistentEvents.OnUse.GetPersistentEventCount() - 1; i >= 0; i--)
                 {
                     persistentEvents.OnUse.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
                 }
 
-                // activate fastDownButton and add listener
-                fastDownButtonGO.SetActive(true);  // is this necessary?
-                persistentEvents.OnUse.AddListener(loopScrollArrowControllerW.ScrollDownFast);
-
-                // Rework the button animator
-                //btnAnimator = fastDownButtonGO.GetComponent<Animator>();
-
-                // Reposition BoxCollider
-                origCollider = bottomButtonT.GetComponent<BoxCollider>();
-                newCollider = fastDownButtonGO.GetComponent<BoxCollider>();
-                newCollider.center = origCollider.center + (fastDownButtonGO.transform.position - bottomButtonT.position);
-                newCollider.size = origCollider.size * fastDownButtonGO.transform.localScale.x / bottomButtonT.localScale.x;                
+                // add OnUse listener
+                persistentEvents.OnTouch.AddListener(controllerFSAC.FastScrollDownHover);
+                persistentEvents.OnUntouch.AddListener(controllerFSAC.FastScrollDownOut);
+                persistentEvents.OnUse.AddListener(controllerFSAC.FastScrollDown);
 
                 //===============================================================================================
 
@@ -151,18 +125,33 @@ namespace SRFastScrollButtons
                 fastUpButtonGO.transform.position = newPosition;
                 fastUpButtonGO.transform.localScale = topButtonT.localScale;
 
-                // remove pre-existing listeners from fastDownButton
-                eventsVIOUE = fastUpButtonGO.GetComponent<VRTK_InteractableObject_UnityEvents>();
-                eventsVIOUE.OnUse.RemoveAllListeners(); // no non-persistent listeners to remove as of 20230602
+                // get all event listeners
+                events = fastUpButtonGO.GetComponent<VRTK_InteractableObject_UnityEvents>();
                 persistentEvents = fastUpButtonGO.GetComponentInChildren<VRTK_InteractableObject_UnityEvents>();
+
+                // remove pre-existing listeners
+                events.OnTouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUntouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUse.RemoveAllListeners(); // no (non-persistent) listeners to remove as of 20230602
+
+                // disable pre-existing persistent listeners
+                for (int i = persistentEvents.OnTouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnTouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUntouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUntouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
                 for (int i = persistentEvents.OnUse.GetPersistentEventCount() - 1; i >= 0; i--)
                 {
                     persistentEvents.OnUse.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
                 }
 
-                // activate fastDownButton and add listener
-                fastUpButtonGO.SetActive(true);  // is this necessary?
-                persistentEvents.OnUse.AddListener(loopScrollArrowControllerW.ScrollUpFast);
+                // add OnUse listener
+                persistentEvents.OnTouch.AddListener(controllerFSAC.FastScrollUpHover);
+                persistentEvents.OnUntouch.AddListener(controllerFSAC.FastScrollUpOut);
+                persistentEvents.OnUse.AddListener(controllerFSAC.FastScrollUp);
                 //===============================================================================================
 
                 //===============================================================================================
@@ -175,16 +164,16 @@ namespace SRFastScrollButtons
                 float downIconVertOffset = downIconVertDiff / 2.0f;
 
                 // shift the icons to keep them more centered when the third one is added
-                origScale = downIcon0GO.transform.localScale;
+                originalScale = downIcon0GO.transform.localScale;
                 newPosition = downIcon0GO.transform.position;
                 newPosition.y -= downIconVertOffset;
                 downIcon0GO.transform.position = newPosition;
-                downIcon0GO.transform.localScale = origScale;
-                origScale = downIcon1GO.transform.localScale;
+                downIcon0GO.transform.localScale = originalScale;
+                originalScale = downIcon1GO.transform.localScale;
                 newPosition = downIcon1GO.transform.position;
                 newPosition.y -= downIconVertOffset;
                 downIcon1GO.transform.position = newPosition;
-                downIcon1GO.transform.localScale = origScale;
+                downIcon1GO.transform.localScale = originalScale;
 
                 // Clone the outermost icon
                 GameObject downIcon2GO = GameObject.Instantiate(downIcon1GO);
@@ -208,16 +197,16 @@ namespace SRFastScrollButtons
                 float upIconVertOffset = upIconVertDiff / 2.0f;
 
                 // shift the icons to keep them more centered when the third one is added
-                origScale = upIcon0GO.transform.localScale;
+                originalScale = upIcon0GO.transform.localScale;
                 newPosition = upIcon0GO.transform.position;
                 newPosition.y += upIconVertOffset;
                 upIcon0GO.transform.position = newPosition;
-                upIcon0GO.transform.localScale = origScale;
-                origScale = upIcon1GO.transform.localScale;
+                upIcon0GO.transform.localScale = originalScale;
+                originalScale = upIcon1GO.transform.localScale;
                 newPosition = upIcon1GO.transform.position;
                 newPosition.y += upIconVertOffset;
                 upIcon1GO.transform.position = newPosition;
-                upIcon1GO.transform.localScale = origScale;
+                upIcon1GO.transform.localScale = originalScale;
 
                 // Clone the outermost icon
                 GameObject upIcon2GO = GameObject.Instantiate(upIcon0GO);
@@ -230,61 +219,137 @@ namespace SRFastScrollButtons
                 upIcon2GO.transform.position = newPosition;
                 upIcon2GO.transform.localScale = upIcon0GO.transform.localScale;
                 //===============================================================================================
+                // activate objects
+                fastUpButtonGO.SetActive(true);
+                fastDownButtonGO.SetActive(true);
+                //===============================================================================================
 
                 //===============================================================================================
-                // Delete the original LoopScrollArrowController component and replace with the LSACWrapper instance
-                //Component.Destroy(controllerLSAC);
+                // redirect Down button events to the FastScrollArrowController
+                // get all event listeners
+                events = downButtonT.GetComponent<VRTK_InteractableObject_UnityEvents>();
+                persistentEvents = downButtonT.GetComponentInChildren<VRTK_InteractableObject_UnityEvents>();
+
+                // remove pre-existing listeners
+                events.OnTouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUntouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUse.RemoveAllListeners(); // no (non-persistent) listeners to remove as of 20230602
+
+                // disable pre-existing persistent listeners
+                for (int i = persistentEvents.OnTouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnTouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUntouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUntouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUse.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUse.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+
+                // add OnUse listener
+                persistentEvents.OnTouch.AddListener(controllerFSAC.ScrollDownHover);
+                persistentEvents.OnUntouch.AddListener(controllerFSAC.ScrollDownOut);
+                persistentEvents.OnUse.AddListener(controllerFSAC.ScrollDown);
+                //===============================================================================================
+                // redirect Up button events to the FastScrollArrowController
+                // get all event listeners
+                events = upButtonT.GetComponent<VRTK_InteractableObject_UnityEvents>();
+                persistentEvents = upButtonT.GetComponentInChildren<VRTK_InteractableObject_UnityEvents>();
+
+                // remove pre-existing listeners
+                events.OnTouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUntouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUse.RemoveAllListeners(); // no (non-persistent) listeners to remove as of 20230602
+
+                // disable pre-existing persistent listeners
+                for (int i = persistentEvents.OnTouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnTouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUntouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUntouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUse.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUse.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+
+                // add OnUse listener
+                persistentEvents.OnTouch.AddListener(controllerFSAC.ScrollUpHover);
+                persistentEvents.OnUntouch.AddListener(controllerFSAC.ScrollUpOut);
+                persistentEvents.OnUse.AddListener(controllerFSAC.ScrollUp);
+                //===============================================================================================
+                // redirect Bottom button events to the FastScrollArrowController
+                // get all event listeners
+                events = bottomButtonT.GetComponent<VRTK_InteractableObject_UnityEvents>();
+                persistentEvents = bottomButtonT.GetComponentInChildren<VRTK_InteractableObject_UnityEvents>();
+
+                // remove pre-existing listeners
+                events.OnTouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUntouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUse.RemoveAllListeners(); // no (non-persistent) listeners to remove as of 20230602
+
+                // disable pre-existing persistent listeners
+                for (int i = persistentEvents.OnTouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnTouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUntouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUntouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUse.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUse.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+
+                // add OnUse listener
+                persistentEvents.OnTouch.AddListener(controllerFSAC.ScrollBottomHover);
+                persistentEvents.OnUntouch.AddListener(controllerFSAC.ScrollBottomOut);
+                persistentEvents.OnUse.AddListener(controllerFSAC.ScrollBottom);
+                //===============================================================================================
+                // redirect Top button events to the FastScrollArrowController
+                // get all event listeners
+                events = topButtonT.GetComponent<VRTK_InteractableObject_UnityEvents>();
+                persistentEvents = topButtonT.GetComponentInChildren<VRTK_InteractableObject_UnityEvents>();
+
+                // remove pre-existing listeners
+                events.OnTouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUntouch.RemoveAllListeners(); // 1 (non-persistent) listener to remove as of 20230602
+                events.OnUse.RemoveAllListeners(); // no (non-persistent) listeners to remove as of 20230602
+
+                // disable pre-existing persistent listeners
+                for (int i = persistentEvents.OnTouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnTouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUntouch.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUntouch.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+                for (int i = persistentEvents.OnUse.GetPersistentEventCount() - 1; i >= 0; i--)
+                {
+                    persistentEvents.OnUse.SetPersistentListenerState(i, UnityEventCallState.Off); // 1 persistent listener to remove as of 20230602 (ScrollBottom)
+                }
+
+                // add OnUse listener
+                persistentEvents.OnTouch.AddListener(controllerFSAC.ScrollTopHover);
+                persistentEvents.OnUntouch.AddListener(controllerFSAC.ScrollTopOut);
+                persistentEvents.OnUse.AddListener(controllerFSAC.ScrollTop);
                 //===============================================================================================
             }
             catch (NullReferenceException ex)
             {
+                string stackTrace = ex.StackTrace;
                 MelonLogger.Msg("Null reference exception: " + ex.Message);
                 MelonLogger.Msg("Stack Trace: " + ex.StackTrace);
             }
 
         }
 
-        //public void ScrollUpFast(object sender, VRTK.InteractableObjectEventArgs e)
-        //{
-        //    try
-        //    {
-        //        if (controllerLSAC.CurrentIndex - fastStepCount > 0)
-        //        {
-        //            controllerLSAC.CurrentIndex -= fastStepCount;
-        //        }
-        //        else
-        //        {
-        //            controllerLSAC.CurrentIndex = 0;
-        //        }
-        //        DoScrollMI.Invoke(controllerLSAC, args);
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        MelonLogger.Msg("Null reference exception: " + ex.Message);
-        //        MelonLogger.Msg("Stack Trace: " + ex.StackTrace);
-        //    }
-        //}
-
-        //public void ScrollDownFast(object sender, VRTK.InteractableObjectEventArgs e)
-        //{
-        //    try
-        //    {
-        //        if (controllerLSAC.CurrentIndex + fastStepCount < loopScrollLSR.totalCount)
-        //        {
-        //            controllerLSAC.CurrentIndex += fastStepCount;
-        //        } 
-        //        else
-        //        {
-        //            controllerLSAC.CurrentIndex = loopScrollLSR.totalCount - 1;
-        //        }
-        //        DoScrollMI.Invoke(controllerLSAC, args);
-        //    }
-        //    catch (NullReferenceException ex)
-        //    {
-        //        MelonLogger.Msg("Null reference exception: " + ex.Message);
-        //        MelonLogger.Msg("Stack Trace: " + ex.StackTrace);
-        //    }
-        //}   
-        
     }
 }

@@ -34,5 +34,5 @@ using MelonLoader;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: MelonInfo(typeof(SRFastScrollButtons.SRFastScrollButtons), "SRFastScrollButtons", "1.0.0", "Goldfish")]
+[assembly: MelonInfo(typeof(SRFastScrollButtons.SRFastScrollButtons), "SRFastScrollButtons", "1.1.0", "Goldfish")]
 [assembly: MelonGame("Kluge Interactive", "SynthRiders")]
