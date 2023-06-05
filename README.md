@@ -2,7 +2,7 @@
 
 Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
 
-The standard arrow buttons also scroll instantly one page at a time, so the scroll animation no longer glitches out if you spam those buttons.
+The middle arrow buttons also scroll instantly one page at a time, so the scroll animation no longer glitches out if you spam those buttons.
 
 ![preview](preview.png)
 
