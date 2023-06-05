@@ -384,6 +384,16 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
+        public void ControllerScrollUp()
+        {
+            if (this.currentIndex < this.loopScroll.totalCount)
+            {
+                this.prevIndex = this.currentIndex;
+                this.currentIndex += this.StepCount;
+                this.DoScroll(false);
+            }
+        }
+
         public void ScrollDown(object sender, VRTK.InteractableObjectEventArgs e)
         {
             ScrollDown();
@@ -398,6 +408,16 @@ namespace SRFastScrollButtons.MonoBehaviors
                 this.currentIndex -= this.StepCount;
                 //this.DoScroll(false);
                 DoScroll(true);
+            }
+        }
+        
+        public void ControllerScrollDown()
+        {
+            if (this.currentIndex < this.loopScroll.totalCount)
+            {
+                this.prevIndex = this.currentIndex;
+                this.currentIndex += this.StepCount;
+                this.DoScroll(false);
             }
         }
 
@@ -568,12 +588,12 @@ namespace SRFastScrollButtons.MonoBehaviors
                 this.WaitForTouchpadRest = true;
                 if (touchpadAxis.y > 0f)
                 {
-                    this.ScrollDown();
+                    this.ControllerScrollDown();
                     return;
                 }
                 if (touchpadAxis.y < 0f)
                 {
-                    this.ScrollUp();
+                    this.ControllerScrollUp();
                 }
             }
         }
