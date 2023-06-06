@@ -35,10 +35,10 @@ namespace SRFastScrollButtons.MonoBehaviors
             // Defaults
             CurrentIndex = Game_InfoProvider.SongSelected.songIndex; // had to use CE to trace where this originated from!
             loopScroll = songsScroll.GetComponent<LoopVerticalScrollRect>();
-            loopScroll.totalCount = 999999999; // hack to prevent DoScroll from resetting currentIndex back to 0
+            loopScroll.totalCount = 999999999; // hack to prevent DoScroll from resetting currentIndex back to 0 the first time it's executed
             fadeArrowsAutomatically = true;
             ScrollEasing = LSAC.ScrollEasing;
-            UseTouchpadController = true;
+            UseTouchapdController = false; // it's TRUE in the LSAC, so I'm disabling here since I'm no longer attempting to override controller behavior
             fastStepCount = fastStepFactor * stepCount;
             //MelonLogger.Msg("stepCount = " + stepCount);
             //MelonLogger.Msg("fastStepFactor = " + fastStepFactor);
@@ -71,7 +71,7 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
 
             // Original code
-            this.SetControllersEvents();
+            //this.SetControllersEvents(); // this caused the controller thumbstick controls to become glitchy
 
             // check for unwanted nulls
             if (loopScroll == null ) { MelonLogger.Msg("loopScroll is null!"); }
@@ -100,7 +100,7 @@ namespace SRFastScrollButtons.MonoBehaviors
         }
 
         // Token: 0x06001BD4 RID: 7124 RVA: 0x000A0A40 File Offset: 0x0009EC40
-        private void LateUpdate()
+        private void LateUpdate() // what calls this in the native LSAC?
         {
             if (this.hideArrowsAutomatically)
             {
@@ -226,9 +226,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BD5 RID: 7125 RVA: 0x000A0CBE File Offset: 0x0009EEBE
         public void ScrollDownHover(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollDownHover()
+        {
+            ScrollDownHover();
+        }
+
+        // Token: 0x06001BD5 RID: 7125 RVA: 0x000A0CBE File Offset: 0x0009EEBE
+        public void ScrollDownHover()
         {
             if (!this.downFaded)
             {
@@ -236,9 +240,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BD6 RID: 7126 RVA: 0x000A0CD8 File Offset: 0x0009EED8
         public void ScrollDownOut(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollDownOut()
+        {
+            ScrollDownOut();
+        }
+
+        // Token: 0x06001BD6 RID: 7126 RVA: 0x000A0CD8 File Offset: 0x0009EED8
+        public void ScrollDownOut()
         {
             if (!this.downFaded)
             {
@@ -246,9 +254,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BD7 RID: 7127 RVA: 0x000A0CF2 File Offset: 0x0009EEF2
         public void ScrollUpHover(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollUpHover()
+        {
+            ScrollUpHover();
+        }
+
+        // Token: 0x06001BD7 RID: 7127 RVA: 0x000A0CF2 File Offset: 0x0009EEF2
+        public void ScrollUpHover()
         {
             if (!this.upFaded)
             {
@@ -256,9 +268,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BD8 RID: 7128 RVA: 0x000A0D0C File Offset: 0x0009EF0C
         public void ScrollUpOut(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollUpOut()
+        {
+            ScrollUpOut();
+        }
+
+        // Token: 0x06001BD8 RID: 7128 RVA: 0x000A0D0C File Offset: 0x0009EF0C
+        public void ScrollUpOut()
         {
             if (!this.upFaded)
             {
@@ -266,9 +282,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BD9 RID: 7129 RVA: 0x000A0D26 File Offset: 0x0009EF26
         public void ScrollTopHover(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollTopHover()
+        {
+            ScrollTopHover();
+        }
+
+        // Token: 0x06001BD9 RID: 7129 RVA: 0x000A0D26 File Offset: 0x0009EF26
+        public void ScrollTopHover()
         {
             if (!this.downFaded)
             {
@@ -276,9 +296,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BDA RID: 7130 RVA: 0x000A0D40 File Offset: 0x0009EF40
         public void ScrollTopOut(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollTopOut()
+        {
+            ScrollTopOut();
+        }
+
+        // Token: 0x06001BDA RID: 7130 RVA: 0x000A0D40 File Offset: 0x0009EF40
+        public void ScrollTopOut()
         {
             if (!this.downFaded)
             {
@@ -286,9 +310,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BDB RID: 7131 RVA: 0x000A0D5A File Offset: 0x0009EF5A
         public void ScrollBottomHover(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollBottomHover()
+        {
+            ScrollBottomHover();
+        }
+
+        // Token: 0x06001BDB RID: 7131 RVA: 0x000A0D5A File Offset: 0x0009EF5A
+        public void ScrollBottomHover()
         {
             if (!this.upFaded)
             {
@@ -296,9 +324,13 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
         }
 
-        // Token: 0x06001BDC RID: 7132 RVA: 0x000A0D74 File Offset: 0x0009EF74
         public void ScrollBottomOut(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollBottomOut()
+        {
+            ScrollBottomOut();
+        }
+
+        // Token: 0x06001BDC RID: 7132 RVA: 0x000A0D74 File Offset: 0x0009EF74
+        public void ScrollBottomOut()
         {
             if (!this.upFaded)
             {
@@ -309,6 +341,12 @@ namespace SRFastScrollButtons.MonoBehaviors
         // SRFS
         public void FastScrollDownHover(object sender, VRTK.InteractableObjectEventArgs e)
         {
+            FastScrollDownHover();
+        }
+
+        // SRFS
+        public void FastScrollDownHover()
+        {
             if (!downFaded)
             {
                 fastDownAnimator.SetTrigger("Highlighted");
@@ -317,6 +355,12 @@ namespace SRFastScrollButtons.MonoBehaviors
 
         // SRFS
         public void FastScrollDownOut(object sender, VRTK.InteractableObjectEventArgs e)
+        {
+            FastScrollDownOut();
+        }
+
+        // SRFS
+        public void FastScrollDownOut()
         {
             if (!downFaded)
             {
@@ -327,6 +371,12 @@ namespace SRFastScrollButtons.MonoBehaviors
         // SRFS
         public void FastScrollUpHover(object sender, VRTK.InteractableObjectEventArgs e)
         {
+            FastScrollUpHover();
+        }
+
+        // SRFS
+        public void FastScrollUpHover()
+        {
             if (!upFaded)
             {
                 fastUpAnimator.SetTrigger("Highlighted");
@@ -335,6 +385,12 @@ namespace SRFastScrollButtons.MonoBehaviors
 
         // SRFS
         public void FastScrollUpOut(object sender, VRTK.InteractableObjectEventArgs e)
+        {
+            FastScrollUpOut();
+        }
+
+        // SRFS
+        public void FastScrollUpOut()
         {
             if (!upFaded)
             {
@@ -345,12 +401,12 @@ namespace SRFastScrollButtons.MonoBehaviors
         // Token: 0x06001BDD RID: 7133 RVA: 0x000A0D90 File Offset: 0x0009EF90
         private void DoScroll(bool quick = false)
         {
-            if (this.currentIndex % this.StepCount > 0)
+            if (CurrentIndex % this.StepCount > 0)
             {
-                this.currentIndex += this.StepCount - this.currentIndex % this.StepCount;
+                this.CurrentIndex += this.StepCount - this.CurrentIndex % this.StepCount;
             }
-            this.currentIndex = Mathf.Clamp(this.currentIndex, 0, this.loopScroll.totalCount - 1);
-            if (this.currentIndex == this.loopScroll.totalCount - 1)
+            this.CurrentIndex = Mathf.Clamp(this.CurrentIndex, 0, this.loopScroll.totalCount - 1);
+            if (this.CurrentIndex == this.loopScroll.totalCount - 1)
             {
                 this.CurrentIndex = this.loopScroll.totalCount - this.StepCount;
                 if (this.CurrentIndex < 0)
@@ -360,25 +416,24 @@ namespace SRFastScrollButtons.MonoBehaviors
             }
             if (quick)
             {
-                this.loopScroll.RefillCells(this.currentIndex);
+                this.loopScroll.RefillCells(this.CurrentIndex);
                 return;
             }
-            this.loopScroll.SrollToCell(this.currentIndex, this.scrollSpeed, this.scrollDrag);
+            this.loopScroll.SrollToCell(this.CurrentIndex, this.scrollSpeed, this.scrollDrag);
         }
 
-        public void ScrollUp(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollUp()
-        {
+        public void ScrollUp(object sender, VRTK.InteractableObjectEventArgs e)        
+        {            
             ScrollUp();
         }
 
         // Token: 0x06001BDE RID: 7134 RVA: 0x000A0E5C File Offset: 0x0009F05C
         public void ScrollUp()
         {
-            if (this.currentIndex< this.loopScroll.totalCount)
+            if (this.CurrentIndex < this.loopScroll.totalCount)
             {
-                this.prevIndex = this.currentIndex;
-                this.currentIndex += this.StepCount;
+                this.prevIndex = this.CurrentIndex;
+                this.CurrentIndex += this.StepCount;
                 //this.DoScroll(false);
                 DoScroll(true);
             }
@@ -386,26 +441,26 @@ namespace SRFastScrollButtons.MonoBehaviors
 
         public void ControllerScrollUp()
         {
-            if (this.currentIndex < this.loopScroll.totalCount)
+            if (this.CurrentIndex < this.loopScroll.totalCount)
             {
-                this.prevIndex = this.currentIndex;
-                this.currentIndex += this.StepCount;
+                this.prevIndex = this.CurrentIndex;
+                this.CurrentIndex += this.StepCount;
                 this.DoScroll(false);
             }
         }
 
         public void ScrollDown(object sender, VRTK.InteractableObjectEventArgs e)
         {
-            ScrollDown();
+            SrollDown();
         }
 
         // Token: 0x06001BDF RID: 7135 RVA: 0x000A0E97 File Offset: 0x0009F097
-        public void ScrollDown()
+        public void SrollDown()
         {
-            if (this.currentIndex > 0)
+            if (this.CurrentIndex > 0)
             {
-                this.prevIndex = this.currentIndex;
-                this.currentIndex -= this.StepCount;
+                this.prevIndex = this.CurrentIndex;
+                this.CurrentIndex -= this.StepCount;
                 //this.DoScroll(false);
                 DoScroll(true);
             }
@@ -413,66 +468,82 @@ namespace SRFastScrollButtons.MonoBehaviors
         
         public void ControllerScrollDown()
         {
-            if (this.currentIndex < this.loopScroll.totalCount)
+            if (this.CurrentIndex < this.loopScroll.totalCount)
             {
-                this.prevIndex = this.currentIndex;
-                this.currentIndex += this.StepCount;
+                this.prevIndex = this.CurrentIndex;
+                this.CurrentIndex += this.StepCount;
                 this.DoScroll(false);
             }
         }
 
-        // Token: 0x06001BE0 RID: 7136 RVA: 0x000A0EC8 File Offset: 0x0009F0C8
         public void ScrollTop(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollTop()
         {
-            if (this.currentIndex > 0)
+            ScrollTop();
+        }
+
+        // Token: 0x06001BE0 RID: 7136 RVA: 0x000A0EC8 File Offset: 0x0009F0C8
+        public void ScrollTop()
+        {
+            if (this.CurrentIndex > 0)
             {
-                this.currentIndex = 0;
+                this.CurrentIndex = 0;
                 this.DoScroll(true);
             }
         }
 
-        // Token: 0x06001BE1 RID: 7137 RVA: 0x000A0EE1 File Offset: 0x0009F0E1
         public void ScrollBottom(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void ScrollBottom()
         {
-            if (this.currentIndex < this.loopScroll.totalCount)
+            ScrollBottom();
+        }
+
+        // Token: 0x06001BE1 RID: 7137 RVA: 0x000A0EE1 File Offset: 0x0009F0E1
+        public void ScrollBottom()
+        {
+            if (this.CurrentIndex < this.loopScroll.totalCount)
             {
-                this.currentIndex = this.loopScroll.totalCount - 1;
+                this.CurrentIndex = this.loopScroll.totalCount - 1;
                 this.DoScroll(true);
             }
         }
 
         // SRFS
         public void FastScrollUp(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void FastScrollUp()
         {
-            if (currentIndex - fastStepCount > 0)
+            FastScrollUp();
+        }
+
+        public void FastScrollUp()
+        {
+            if (CurrentIndex - fastStepCount > 0)
             {
                 //prevIndex = currentIndex;
-                currentIndex -= fastStepCount;
+                CurrentIndex -= fastStepCount;
             }
             else
             {
                 //prevIndex = currentIndex;
-                currentIndex = 0;
+                CurrentIndex = 0;
             }
             DoScroll(true);
         }
 
         // SRFS
         public void FastScrollDown(object sender, VRTK.InteractableObjectEventArgs e)
-        //public void FastScrollDown()
         {
-            if (currentIndex + fastStepCount < loopScroll.totalCount)
+            FastScrollDown();
+        }
+
+        public void FastScrollDown()
+        {
+            if (CurrentIndex + fastStepCount < loopScroll.totalCount)
             {
                 //prevIndex = currentIndex;
-                currentIndex += fastStepCount;
+                CurrentIndex += fastStepCount;
             }
             else
             {
                 //prevIndex = currentIndex;
-                currentIndex = loopScroll.totalCount - 1;
+                CurrentIndex = loopScroll.totalCount - 1;
             }
             DoScroll(true);
         }
@@ -484,11 +555,13 @@ namespace SRFastScrollButtons.MonoBehaviors
         {
             get
             {
+                currentIndex = LSAC.CurrentIndex; // SRFS
                 return this.currentIndex;
             }
             set
             {
                 this.currentIndex = value;
+                LSAC.CurrentIndex = currentIndex; // SRFS
             }
         }
 
@@ -528,7 +601,7 @@ namespace SRFastScrollButtons.MonoBehaviors
         // Token: 0x06001BE9 RID: 7145 RVA: 0x000A0F58 File Offset: 0x0009F158
         private void SetControllersEvents()
         {
-            if (!this.UseTouchpadController)
+            if (!this.UseTouchapdController)
             {
                 return;
             }
@@ -700,7 +773,7 @@ namespace SRFastScrollButtons.MonoBehaviors
 
         // Token: 0x04001EF5 RID: 7925
         [SerializeField]
-        private bool UseTouchpadController;
+        private bool UseTouchapdController;
 
         // Token: 0x04001EF6 RID: 7926
         private bool WaitForTouchpadRest;
