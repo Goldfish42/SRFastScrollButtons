@@ -1,6 +1,6 @@
 # SRFastScrollButtons
 
-Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
+Adds new scroll buttons for 10x faster song scrolling in Synth Riders [PCVR]
 
 The middle arrow buttons also scroll instantly one page at a time, so the scroll animation no longer glitches out if you spam those buttons.
 
