@@ -1,6 +1,6 @@
 # SRFastScrollButtons
 
-Adds new scroll buttons for faster song navigation in Synth Riders [PCVR]
+Adds new scroll buttons for 10x faster song scrolling in Synth Riders [PCVR]
 
 The middle arrow buttons also scroll instantly one page at a time, so the scroll animation no longer glitches out if you spam those buttons.
 
@@ -14,6 +14,7 @@ The middle arrow buttons also scroll instantly one page at a time, so the scroll
 3. [Jam out with Strong Bad!](https://homestarrunner.com/assets/sbemails/sounds/scrollsong3_10.mp3)
 
 ## Known Issues
+* Functional: Scrolling with thumbsticks seems to be only partially working.  Rely on the arrows for now.
 * Cosmetic: Scrolling with the controller thumbstick always gives animation appearance that the list is scrolling down, even if it's actually scrolling up.
 * Cosmetic: At the very top or bottom of the song list, the appropriate buttons do not become disabled.
 
