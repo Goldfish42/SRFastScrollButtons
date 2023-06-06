@@ -6,7 +6,7 @@ using MelonLoader;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SRFastScrollButtons")]
-[assembly: AssemblyDescription("Adds new scroll buttons for faster song navigation.")]
+[assembly: AssemblyDescription("Adds new scroll buttons for 10x faster song scrolling.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SRFastScrollButtons")]
@@ -34,5 +34,5 @@ using MelonLoader;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: MelonInfo(typeof(SRFastScrollButtons.SRFastScrollButtons), "SRFastScrollButtons", "1.1.0", "Goldfish")]
+[assembly: MelonInfo(typeof(SRFastScrollButtons.SRFastScrollButtons), "SRFastScrollButtons", "1.2.0", "Goldfish")]
 [assembly: MelonGame("Kluge Interactive", "SynthRiders")]

@@ -1,5 +1,5 @@
 
-set BUILT_VERSION="1.1.0"
+set BUILT_VERSION="1.2.0"
 set MOD_NAME="SRFastScrollButtons"
 
 set RELEASE_BUILD_DIR=".\bin\Release"
