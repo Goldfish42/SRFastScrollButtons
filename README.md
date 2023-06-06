@@ -14,7 +14,7 @@ The middle arrow buttons also scroll instantly one page at a time, so the scroll
 3. [Jam out with Strong Bad!](https://homestarrunner.com/assets/sbemails/sounds/scrollsong3_10.mp3)
 
 ## Known Issues
-* Functional: Scrolling with thumbsticks seem to not be working correctly.  Rely on the arrows for now.
+* Functional: Scrolling with thumbsticks seems to be only partially working.  Rely on the arrows for now.
 * Cosmetic: Scrolling with the controller thumbstick always gives animation appearance that the list is scrolling down, even if it's actually scrolling up.
 * Cosmetic: At the very top or bottom of the song list, the appropriate buttons do not become disabled.
 
